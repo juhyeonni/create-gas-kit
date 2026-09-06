@@ -34,12 +34,12 @@ TypeScript is always on. Package manager is detected from `npm_config_user_agent
   package.json            name set by CLI; scripts: dev, build, typecheck, lint, format, test, setup, push, deploy, open
   appsscript.json         V8, timeZone, webapp { access: MYSELF, executeAs: USER_ACCESSING }; access is chosen in setup
   index.html              vite dev entry, <script type=module src=/src/client/main.ts(x)>
-  vite.config.ts          COMPOSED by CLI (plugin list); single js + single css output, template literals lowered
+  vite.config.ts          COMPOSED by CLI (plugin list); alias + dev server only — build options live in gas-app-kit
   tsconfig.json           references only
   tsconfig.client.json    DOM lib, jsx when react, paths @/* -> src/client/*, includes src/client + src/shared
   tsconfig.server.json    no DOM, types google-apps-script, includes src/server + src/shared
   eslint.config.js, .prettierrc, vitest.config.ts, README.md, _gitignore (renamed to .gitignore on copy)
-  scripts/build.mjs       see pipeline
+  scripts/build.mjs       three lines: `buildWebApp()` from gas-app-kit, see pipeline
   scripts/setup.mjs       see setup
   src/shared/api.ts       `Api` interface: action name -> (args) => result; shared by server and client
   src/server/index.ts     doGet, include, rpc(action, args) dispatcher
@@ -76,11 +76,14 @@ The gsquery example uses `@gsquery/core` on the server only (SheetsAdapter); no 
 
 ## Build pipeline (`scripts/build.mjs`)
 
-1. Client: programmatic `vite build`. vite.config sets `build.cssCodeSplit=false`, `rollupOptions.output.codeSplitting=false`, fixed output names `app.js` / `app.css`, `modulePreload=false`, large `assetsInlineLimit`. Template literals are then lowered by an `esbuild.transform` post-step in build.mjs with `supported['template-literal']=false` (Vite 8 runs on Rolldown/oxc and ignores `esbuild` config options once `@vitejs/plugin-react` is present, so this cannot live in vite.config); residual backticks inside string literals are escaped to `\u0060`, as the reference repos did after their Babel step.
-2. Server: esbuild bundle `src/server/index.ts` (esm, es2019) → strip `export` statements / `import` lines → prepend banner from `collectBuildInfo` (gas-app-kit) → `build/Code.gs`.
-3. `build/index.html`: inline `<style>`, `<div id="app">`, `<?!= include('app') ?>`. `build/app.html`: `<script>` with the JS run through the reference `escapeJsForGas` (`</script>` and `://` escaped, residual backticks → ```).
+`scripts/build.mjs` only calls `buildWebApp()` from gas-app-kit (>= 0.2.0, create-gas-kit#2). That function owns the whole pipeline, so fixes reach every generated project through a dependency bump:
+
+1. Client: programmatic `vite build` with the fixed output options passed inline (`cssCodeSplit=false`, `rollupOptions.output.codeSplitting=false`, `app.js` / `app.css`, `modulePreload=false`, large `assetsInlineLimit`), so the template's `vite.config.ts` carries only alias, dev server and the plugin list. Template literals are then lowered by an `esbuild.transform` post-step with `supported['template-literal']=false` (Vite 8 runs on Rolldown/oxc and ignores `esbuild` config options once `@vitejs/plugin-react` is present); residual backticks become `\u0060`.
+2. Server: esbuild bundle `src/server/index.ts` (esm, es2019) → strip `export` statements / `import` lines → prepend banner from `collectBuildInfo` → `build/Code.gs`.
+3. `build/index.html`: inline `<style>`, `<div id="app">`, `<?!= include('app') ?>`. `build/app.html`: `<script>` with `</script>` and `://` escaped.
 4. Copy `appsscript.json` → `build/`.
-Uses `createUI` and `collectBuildInfo` from gas-app-kit instead of copying `ui.mjs`. Reference implementation: `/Users/juhyeonni/.ghq/github.com/anesis-dx/gas-task-manager/scripts/build.mjs`. The `apiGet`/`apiPost` rename hack from that file is not needed here.
+
+`vite` and `esbuild` stay in the generated project's devDependencies: they are optional peers of gas-app-kit that `buildWebApp` loads on demand. Reference implementation before the move: `/Users/juhyeonni/.ghq/github.com/anesis-dx/gas-task-manager/scripts/build.mjs`.
 
 ## Setup (`scripts/setup.mjs`, `<pm> run setup`)
 
@@ -110,7 +113,6 @@ Missing-env errors on push/deploy are gas-app-kit's own messages; not wrapped.
 
 - Vue / Svelte / Solid / Preact clients (each = one `client-*` dir + one vite plugin line).
 - Other UI frameworks, JS-only output.
-- Moving `build.mjs` into gas-app-kit.
 
 ## Order of work
 

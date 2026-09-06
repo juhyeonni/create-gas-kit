@@ -2,6 +2,8 @@
   "name": "create-gas-kit",
   "version": "0.1.0",
   "type": "module",
+  "license": "MIT",
+  "author": "juhyeonni",
   "bin": {
     "create-gas-kit": "dist/index.js"
   },
@@ -21,7 +23,8 @@
     "format": "prettier --write .",
     "test": "node --test test/*.test.ts",
     "test:integration": "INTEGRATION=1 node --test test/integration.test.ts",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "check:publish": "publint"
   },
   "dependencies": {
     "@clack/prompts": "^1.7.0"
@@ -33,7 +36,11 @@
     "eslint": "^10.10.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.6",
+    "publint": "^0.3.24",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.69.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

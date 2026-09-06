@@ -7,7 +7,10 @@
   "bin": {
     "create-gas-kit": "dist/index.js"
   },
-  "repository": "github:juhyeonni/create-gas-kit",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juhyeonni/create-gas-kit.git"
+  },
   "files": [
     "dist",
     "templates"

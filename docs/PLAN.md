@@ -38,7 +38,7 @@ TypeScript is always on. Package manager is detected from `npm_config_user_agent
   tsconfig.json           references only
   tsconfig.client.json    DOM lib, jsx when react, paths @/* -> src/client/*, includes src/client + src/shared
   tsconfig.server.json    no DOM, types google-apps-script, includes src/server + src/shared
-  eslint.config.js, .prettierrc, vitest.config.ts, _gitignore (renamed to .gitignore on copy)
+  eslint.config.js, .prettierrc, vitest.config.ts, README.md, _gitignore (renamed to .gitignore on copy)
   scripts/build.mjs       see pipeline
   scripts/setup.mjs       see setup
   src/shared/api.ts       `Api` interface: action name -> (args) => result; shared by server and client
@@ -108,7 +108,6 @@ Missing-env errors on push/deploy are gas-app-kit's own messages; not wrapped.
 
 ## Deferred
 
-- README content and language.
 - Vue / Svelte / Solid / Preact clients (each = one `client-*` dir + one vite plugin line).
 - Other UI frameworks, JS-only output.
 - Moving `build.mjs` into gas-app-kit.

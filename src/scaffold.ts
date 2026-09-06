@@ -134,9 +134,10 @@ function applyReplacements(options: ScaffoldOptions): void {
     return content
   })
 
-  replaceInFile(path.join(options.dir, 'src/server/index.ts'), (content) =>
-    content.replaceAll('__APP_NAME__', options.name),
-  )
+  for (const file of ['src/server/index.ts', 'README.md'])
+    replaceInFile(path.join(options.dir, file), (content) =>
+      content.replaceAll('__APP_NAME__', options.name),
+    )
 
   replaceInFile(path.join(options.dir, 'src/client/kit.ts'), (content) =>
     content.replaceAll('__APP_NAME__', options.name).replace(

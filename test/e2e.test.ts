@@ -45,6 +45,10 @@ test(
       fs.readFileSync(path.join(outDir, 'index.html'), 'utf-8'),
       new RegExp(name),
     )
+    assert.match(
+      fs.readFileSync(path.join(outDir, 'README.md'), 'utf-8'),
+      new RegExp(`^# ${name}`),
+    )
     const kit = fs.readFileSync(path.join(outDir, 'src/client/kit.ts'), 'utf-8')
     assert.match(kit, new RegExp(`name: '${name}'`))
     assert.match(kit, /specs: \['vanilla'\],/)

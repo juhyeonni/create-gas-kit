@@ -32,7 +32,7 @@ TypeScript is always on. Package manager is detected from `npm_config_user_agent
 ```
 <name>/
   package.json            name set by CLI; scripts: dev, build, typecheck, lint, format, test, setup, push, deploy, open
-  appsscript.json         V8, timeZone, webapp { access: ANYONE, executeAs: USER_ACCESSING }
+  appsscript.json         V8, timeZone, webapp { access: MYSELF, executeAs: USER_ACCESSING }; access is chosen in setup
   index.html              vite dev entry, <script type=module src=/src/client/main.ts(x)>
   vite.config.ts          COMPOSED by CLI (plugin list); single js + single css output, template literals lowered
   tsconfig.json           references only
@@ -87,7 +87,8 @@ Uses `createUI` and `collectBuildInfo` from gas-app-kit instead of copying `ui.m
 1. `clasp --version`; if not logged in (`clasp show-authorized-user --json`), run `clasp login` interactively.
 2. Prompt env name (default `dev`).
 3. Prompt: create new / connect existing (scriptId) / later.
-4. Create: prompt type `standalone` | `sheets` (default `sheets` when gsquery selected), then `addEnv(name, { title: <project name>, type })` from gas-app-kit. Connect: `addEnv(name, { scriptId })`. Later: print `<pm> run setup`.
+3a. Prompt web app access from a list: MYSELF / DOMAIN / ANYONE (default = current `appsscript.json` value, i.e. MYSELF on first run); written back to `appsscript.json` when changed. Fail-closed: `ANYONE` fails under many Workspace policies, `DOMAIN` is invalid for consumer accounts, so neither is a safe default.
+4. Create: prompt type `standalone` | `sheets` (default `sheets` when gsquery selected), then `addEnv(name, { title: <project name>, type })` from gas-app-kit. Connect: `addEnv(name, { scriptId })`. Later: print `<pm> run setup`. After `addEnv`, set `allowLocalDeploy: true` on the new env via `loadEnvs`/`saveEnvs` (gas-app-kit defaults it to false; an env set up from a laptop is meant to be deployed from it).
 5. Print editor / web-app URLs via gas-app-kit `editorUrl` / `webAppUrl`.
 
 Prerequisite in gas-app-kit (`/Users/juhyeonni/.ghq/github.com/juhyeonni/gas-app-kit`): `AddEnvOptions.type` passed to `clasp create-script --type`, CLI flag `--type`. gas-app-kit 0.1.2 ships this; the template pins `^0.1.2`.

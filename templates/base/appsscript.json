@@ -3,7 +3,7 @@
   "runtimeVersion": "V8",
   "exceptionLogging": "STACKDRIVER",
   "webapp": {
-    "access": "ANYONE",
+    "access": "MYSELF",
     "executeAs": "USER_ACCESSING"
   }
 }

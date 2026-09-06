@@ -24,7 +24,7 @@
     "test": "node --test test/*.test.ts",
     "test:integration": "INTEGRATION=1 node --test test/integration.test.ts",
     "prepublishOnly": "npm run build",
-    "check:publish": "publint"
+    "check:publish": "npm run build && publint"
   },
   "dependencies": {
     "@clack/prompts": "^1.7.0"

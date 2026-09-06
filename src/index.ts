@@ -32,6 +32,7 @@ function usage(): string {
   --gws-emul / --no-gws-emul  local GWS emulator (default off)
   --no-git                    skip git init
   --no-install                skip dependency install
+  --setup / --no-setup        set up the Apps Script project after install (default on)
   -h, --help                  print this help
   -v, --version               print the version
 `
@@ -103,15 +104,19 @@ function printNextSteps(
   dir: string,
   pm: ReturnType<typeof detectPm>,
   installed: boolean,
+  setupDone: boolean,
 ): void {
   const lines = [`cd ${dir}`]
-  if (!installed) {
-    lines.push(installCommand(pm))
-    lines.push(runCommand(pm, 'setup'))
-  }
+  if (!installed) lines.push(installCommand(pm))
+  if (!setupDone) lines.push(runCommand(pm, 'setup'))
   lines.push(runCommand(pm, 'dev'))
   lines.push(runCommand(pm, 'push dev'))
   process.stdout.write(`${lines.join('\n')}\n`)
+  if (setupDone) return
+  process.stdout.write(
+    `\nsetup creates or connects the Apps Script project and writes envs.json.\n` +
+      `You can also write envs.json by hand: { "dev": { "scriptId": "<scriptId>", "deploymentId": "" } }\n`,
+  )
 }
 
 async function main(): Promise<void> {
@@ -126,6 +131,8 @@ async function main(): Promise<void> {
     'no-gws-emul'?: boolean
     'no-git'?: boolean
     'no-install'?: boolean
+    setup?: boolean
+    'no-setup'?: boolean
     help?: boolean
     version?: boolean
   }
@@ -145,6 +152,8 @@ async function main(): Promise<void> {
         'no-gws-emul': { type: 'boolean' },
         'no-git': { type: 'boolean' },
         'no-install': { type: 'boolean' },
+        setup: { type: 'boolean' },
+        'no-setup': { type: 'boolean' },
         help: { type: 'boolean', short: 'h' },
         version: { type: 'boolean', short: 'v' },
       },
@@ -211,6 +220,14 @@ async function main(): Promise<void> {
   )
   const git = !values['no-git']
   const install = !values['no-install']
+  const setup = install
+    ? await resolveBoolean(
+        values.setup,
+        values['no-setup'],
+        'Set up the Apps Script project now? (needs clasp login)',
+        true,
+      )
+    : false
 
   const templatesDir = path.join(
     path.dirname(fileURLToPath(import.meta.url)),
@@ -238,13 +255,12 @@ async function main(): Promise<void> {
     installed = result.status === 0
     if (!installed) process.stderr.write('Warning: install failed\n')
   }
-  if (installed) {
-    if (gsquery)
-      spawnSync(pm, ['run', 'generate'], { cwd: dir, stdio: 'inherit' })
-    spawnSync(pm, ['run', 'setup'], { cwd: dir, stdio: 'inherit' })
-  }
+  if (installed && gsquery)
+    spawnSync(pm, ['run', 'generate'], { cwd: dir, stdio: 'inherit' })
+  const setupDone = installed && setup
+  if (setupDone) spawnSync(pm, ['run', 'setup'], { cwd: dir, stdio: 'inherit' })
 
-  printNextSteps(dir, pm, installed)
+  printNextSteps(dir, pm, installed, setupDone)
   outro('Done')
 }
 

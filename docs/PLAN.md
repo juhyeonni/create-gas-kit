@@ -23,7 +23,7 @@ All prompts have a flag; when every needed value is given by flags the CLI is no
 | 5 | gas-sheets-query | `--gsquery` / `--no-gsquery` |
 | 6 | gws-emul | `--gws-emul` / `--no-gws-emul` |
 | 7 | git init, install | on by default; `--no-git`, `--no-install` |
-| 8 | GAS project | runs the generated project's `scripts/setup.mjs` after install; skipped when `--no-install` |
+| 8 | GAS project | `--setup` / `--no-setup`; runs the generated project's `scripts/setup.mjs` after install; not asked when `--no-install`. When skipped, next steps print `<pm> run setup` and the hand-written `envs.json` shape |
 
 TypeScript is always on. Package manager is detected from `npm_config_user_agent` (npm / pnpm / bun; default npm) and used for install and for printed commands. Timezone for `appsscript.json` is `Intl.DateTimeFormat().resolvedOptions().timeZone`.
 

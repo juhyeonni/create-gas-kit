@@ -32,7 +32,9 @@ export function Notes() {
     <div className="counter">
       <h2>Notes</h2>
       <input
+        className="input"
         type="text"
+        placeholder="New note"
         value={text}
         onChange={(e) => setText(e.target.value)}
       />

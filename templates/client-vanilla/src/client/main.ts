@@ -1,5 +1,6 @@
 import './index.css'
 import { call } from './api'
+import { kit } from './kit'
 
 function renderCounter(container: HTMLElement, title: string) {
   container.innerHTML = `
@@ -19,6 +20,10 @@ if (!app) throw new Error('#app not found')
 
 app.classList.add('app')
 app.innerHTML = `
+  <header class="header">
+    <h1>${kit.name}</h1>
+    <p class="specs">create-gas-kit · ${kit.specs.join(' · ')}</p>
+  </header>
   <div class="counter" id="client-counter"></div>
   <div class="counter" id="server-counter"></div>
   <p class="error" id="error" hidden></p>

@@ -117,6 +117,15 @@ function replaceInFile(
   fs.writeFileSync(file, replace(fs.readFileSync(file, 'utf-8')))
 }
 
+function specs(options: ScaffoldOptions): string[] {
+  const out: string[] = [options.client]
+  if (options.ui === 'tailwind') out.push('tailwind')
+  if (options.shadcn) out.push('shadcn')
+  if (options.gsquery) out.push('gsquery')
+  if (options.gwsEmul) out.push('gws-emul')
+  return out
+}
+
 function applyReplacements(options: ScaffoldOptions): void {
   replaceInFile(path.join(options.dir, 'index.html'), (content) => {
     content = content.replaceAll('__APP_NAME__', options.name)
@@ -127,6 +136,15 @@ function applyReplacements(options: ScaffoldOptions): void {
 
   replaceInFile(path.join(options.dir, 'src/server/index.ts'), (content) =>
     content.replaceAll('__APP_NAME__', options.name),
+  )
+
+  replaceInFile(path.join(options.dir, 'src/client/kit.ts'), (content) =>
+    content.replaceAll('__APP_NAME__', options.name).replace(
+      "'__SPECS__'",
+      specs(options)
+        .map((s) => `'${s}'`)
+        .join(', '),
+    ),
   )
 
   replaceInFile(path.join(options.dir, 'appsscript.json'), (content) => {

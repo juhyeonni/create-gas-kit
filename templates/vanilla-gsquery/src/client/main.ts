@@ -1,5 +1,6 @@
 import './index.css'
 import { call } from './api'
+import { kit } from './kit'
 import type { Note } from '../shared/api'
 
 function renderCounter(container: HTMLElement, title: string) {
@@ -20,12 +21,16 @@ if (!app) throw new Error('#app not found')
 
 app.classList.add('app')
 app.innerHTML = `
+  <header class="header">
+    <h1>${kit.name}</h1>
+    <p class="specs">create-gas-kit · ${kit.specs.join(' · ')}</p>
+  </header>
   <div class="counter" id="client-counter"></div>
   <div class="counter" id="server-counter"></div>
   <div class="counter" id="notes">
     <h2>Notes</h2>
     <ul class="notes-list"></ul>
-    <input class="notes-input" type="text" placeholder="New note" />
+    <input class="input" type="text" placeholder="New note" />
     <button class="button" type="button" data-action="add">Add</button>
   </div>
   <p class="error" id="error" hidden></p>
@@ -35,7 +40,7 @@ const clientCounter = app.querySelector<HTMLElement>('#client-counter')!
 const serverCounter = app.querySelector<HTMLElement>('#server-counter')!
 const notesCard = app.querySelector<HTMLElement>('#notes')!
 const notesList = notesCard.querySelector<HTMLElement>('.notes-list')!
-const notesInput = notesCard.querySelector<HTMLInputElement>('.notes-input')!
+const notesInput = notesCard.querySelector<HTMLInputElement>('.input')!
 const errorEl = app.querySelector<HTMLElement>('#error')!
 
 renderCounter(clientCounter, 'Client counter')

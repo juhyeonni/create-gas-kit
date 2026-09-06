@@ -114,11 +114,10 @@ Missing-env errors on push/deploy are gas-app-kit's own messages; not wrapped.
 
 - gws-emul 0.2.0 surface is partial (e.g. `getRange` A1 notation unsupported). If gsquery + gws-emul dev breaks, simplify the demo query rather than patching gws-emul.
 - `@gws-emul/vite` peer-depends on vite ^8; template pins vite 8.
-- Solid client skipped: `vite-plugin-solid` has no stable release supporting vite 8 — the only vite-8-compatible releases (`3.0.0-next.*`) are a thin re-export of `@solidjs/vite-plugin`, which requires `solid-js@^2.0.0-rc.0`, not the stable 1.x line.
 
 ## Deferred
 
-- Solid client (needs a `vite-plugin-solid` release that supports vite 8 without requiring solid-js 2.x).
+- Solid client: not planned — nobody on the team uses Solid (decided 2026-09-06). If that changes, note that `vite-plugin-solid` had no stable Vite 8 release without solid-js 2.x at the time.
 - Other UI frameworks, JS-only output.
 
 ## Order of work

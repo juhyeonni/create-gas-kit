@@ -54,6 +54,19 @@ test('react + gsquery uses the react combo dir', () => {
   )
 })
 
+test('vue + gsquery uses the vue combo dir', () => {
+  assert.deepEqual(
+    overlayList({
+      client: 'vue',
+      ui: 'none',
+      shadcn: false,
+      gsquery: true,
+      gwsEmul: false,
+    }),
+    ['base', 'client-vue', 'gsquery', 'vue-gsquery'],
+  )
+})
+
 test('everything on, in overlay order', () => {
   assert.deepEqual(
     overlayList({

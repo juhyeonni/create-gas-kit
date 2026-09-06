@@ -1,12 +1,25 @@
 const ANCHOR = "import { defineConfig } from 'vite'"
 const PLUGINS_LITERAL = 'plugins: [],'
 
-export type PluginName = 'react' | 'tailwind' | 'gwsEmul'
+export type PluginName =
+  'react' | 'vue' | 'svelte' | 'preact' | 'tailwind' | 'gwsEmul'
 
 const PLUGIN_TABLE: Record<PluginName, { importLine: string; call: string }> = {
   react: {
     importLine: "import react from '@vitejs/plugin-react'",
     call: 'react()',
+  },
+  vue: {
+    importLine: "import vue from '@vitejs/plugin-vue'",
+    call: 'vue()',
+  },
+  svelte: {
+    importLine: "import { svelte } from '@sveltejs/vite-plugin-svelte'",
+    call: 'svelte()',
+  },
+  preact: {
+    importLine: "import preact from '@preact/preset-vite'",
+    call: 'preact()',
   },
   tailwind: {
     importLine: "import tailwindcss from '@tailwindcss/vite'",

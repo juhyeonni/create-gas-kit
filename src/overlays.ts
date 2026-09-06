@@ -1,5 +1,7 @@
+export const CLIENTS = ['react', 'vanilla', 'vue', 'svelte', 'preact'] as const
+
 export interface OverlaySelection {
-  client: 'react' | 'vanilla'
+  client: (typeof CLIENTS)[number]
   ui: 'tailwind' | 'none'
   shadcn: boolean
   gsquery: boolean

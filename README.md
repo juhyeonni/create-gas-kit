@@ -11,16 +11,16 @@ The CLI asks a few questions, copies the project, installs dependencies, and run
 project's `setup` script, which logs in to clasp and creates (or connects) the Apps
 Script project. Every question has a flag, so the whole run can be non-interactive.
 
-| question                          | flag                           | default    |
-| --------------------------------- | ------------------------------ | ---------- |
-| project name                      | positional `<dir>`             | `gas-app`  |
-| client                            | `--client react\|vanilla`      | `react`    |
-| styling                           | `--ui tailwind\|none`          | `tailwind` |
-| shadcn/ui (react + tailwind only) | `--shadcn` / `--no-shadcn`     | on         |
-| gas-sheets-query example          | `--gsquery` / `--no-gsquery`   | off        |
-| local GWS emulator                | `--gws-emul` / `--no-gws-emul` | off        |
-| run setup after install           | `--setup` / `--no-setup`       | on         |
-| git init, install                 | `--no-git`, `--no-install`     | on         |
+| question                          | flag                                           | default    |
+| --------------------------------- | ---------------------------------------------- | ---------- |
+| project name                      | positional `<dir>`                             | `gas-app`  |
+| client                            | `--client react\|vanilla\|vue\|svelte\|preact` | `react`    |
+| styling                           | `--ui tailwind\|none`                          | `tailwind` |
+| shadcn/ui (react + tailwind only) | `--shadcn` / `--no-shadcn`                     | on         |
+| gas-sheets-query example          | `--gsquery` / `--no-gsquery`                   | off        |
+| local GWS emulator                | `--gws-emul` / `--no-gws-emul`                 | off        |
+| run setup after install           | `--setup` / `--no-setup`                       | on         |
+| git init, install                 | `--no-git`, `--no-install`                     | on         |
 
 Requires Node 20+. The package manager is detected from how you invoked the command
 (`npm`, `pnpm` or `bun`) and used for install and for the printed next steps.

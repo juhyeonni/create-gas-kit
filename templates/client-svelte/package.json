@@ -1,0 +1,7 @@
+{
+  "type": "module",
+  "devDependencies": {
+    "svelte": "^5.57.0",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0"
+  }
+}

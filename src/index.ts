@@ -14,6 +14,7 @@ import {
 } from '@clack/prompts'
 import pkg from '../package.json' with { type: 'json' }
 import { scaffold } from './scaffold.ts'
+import { CLIENTS } from './overlays.ts'
 import { detectPm, installCommand, runCommand } from './pm.ts'
 
 const EXIT_OK = 0
@@ -25,7 +26,7 @@ const NAME_RE = /^[a-z0-9][a-z0-9-]*$/
 function usage(): string {
   return `Usage: create-gas-kit [dir] [flags]
 
-  --client <react|vanilla>    client framework (default react)
+  --client <${CLIENTS.join('|')}>    client framework (default react)
   --ui <tailwind|none>        styling (default tailwind)
   --shadcn / --no-shadcn      shadcn/ui, react + tailwind only (default on)
   --gsquery / --no-gsquery    gas-sheets-query example (default off)
@@ -187,7 +188,7 @@ async function main(): Promise<void> {
     values.client,
     'client',
     'Client',
-    ['react', 'vanilla'],
+    CLIENTS,
     'react',
   )
   const ui = await resolveChoice(

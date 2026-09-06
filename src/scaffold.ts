@@ -1,12 +1,14 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { overlayList } from './overlays.ts'
+import { overlayList, type OverlaySelection } from './overlays.ts'
 import { composeViteConfig, type PluginName } from './vite-config.ts'
+
+const TSX_MAIN_CLIENTS: OverlaySelection['client'][] = ['react', 'preact']
 
 export interface ScaffoldOptions {
   dir: string
   name: string
-  client: 'react' | 'vanilla'
+  client: OverlaySelection['client']
   ui: 'tailwind' | 'none'
   shadcn: boolean
   gsquery: boolean
@@ -100,7 +102,7 @@ function composeViteConfigFile(options: ScaffoldOptions): void {
   const file = path.join(options.dir, 'vite.config.ts')
   if (!fs.existsSync(file)) return
   const plugins: PluginName[] = []
-  if (options.client === 'react') plugins.push('react')
+  if (options.client !== 'vanilla') plugins.push(options.client)
   if (options.ui === 'tailwind') plugins.push('tailwind')
   if (options.gwsEmul) plugins.push('gwsEmul')
   fs.writeFileSync(
@@ -129,7 +131,7 @@ function specs(options: ScaffoldOptions): string[] {
 function applyReplacements(options: ScaffoldOptions): void {
   replaceInFile(path.join(options.dir, 'index.html'), (content) => {
     content = content.replaceAll('__APP_NAME__', options.name)
-    if (options.client === 'react')
+    if (TSX_MAIN_CLIENTS.includes(options.client))
       content = content.replace('/src/client/main.ts"', '/src/client/main.tsx"')
     return content
   })

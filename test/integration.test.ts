@@ -93,6 +93,39 @@ const COMBOS: { name: string; flags: string[] }[] = [
       '--gws-emul',
     ],
   },
+  {
+    name: 'vue',
+    flags: [
+      '--client',
+      'vue',
+      '--ui',
+      'tailwind',
+      '--gsquery',
+      '--no-gws-emul',
+    ],
+  },
+  {
+    name: 'svelte',
+    flags: [
+      '--client',
+      'svelte',
+      '--ui',
+      'tailwind',
+      '--gsquery',
+      '--no-gws-emul',
+    ],
+  },
+  {
+    name: 'preact',
+    flags: [
+      '--client',
+      'preact',
+      '--ui',
+      'tailwind',
+      '--gsquery',
+      '--no-gws-emul',
+    ],
+  },
 ]
 
 let tmpRoot: string

@@ -39,6 +39,15 @@ test('composes imports and plugin calls in the given order', () => {
   )
 })
 
+test('composes the vue plugin with tailwind', () => {
+  const result = composeViteConfig(SOURCE, ['vue', 'tailwind'])
+  assert.match(
+    result,
+    /import \{ defineConfig \} from 'vite'\nimport vue from '@vitejs\/plugin-vue'\nimport tailwindcss from '@tailwindcss\/vite'\n/,
+  )
+  assert.match(result, /plugins: \[vue\(\), tailwindcss\(\)\],/)
+})
+
 test('throws when the anchor import line is missing', () => {
   assert.throws(
     () => composeViteConfig('export default {}', ['react']),

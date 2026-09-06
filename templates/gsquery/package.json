@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "generate": "gsquery generate -s schema.gsq.yaml -o src/server/generated",
+    "dev": "gsquery generate -s schema.gsq.yaml -o src/server/generated && vite",
+    "build": "gsquery generate -s schema.gsq.yaml -o src/server/generated && node scripts/build.mjs",
+    "typecheck": "gsquery generate -s schema.gsq.yaml -o src/server/generated && tsc -b"
+  },
+  "dependencies": {
+    "@gsquery/core": "1.0.0"
+  },
+  "devDependencies": {
+    "@gsquery/cli": "1.0.0"
+  }
+}

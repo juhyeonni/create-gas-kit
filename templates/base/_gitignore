@@ -1,0 +1,7 @@
+node_modules
+dist
+build
+.clasp.json
+.gws-emul
+src/server/generated
+*.tsbuildinfo

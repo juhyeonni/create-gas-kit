@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "@gws-emul/core": "^0.2.0",
+    "@gws-emul/vite": "^0.2.0"
+  }
+}

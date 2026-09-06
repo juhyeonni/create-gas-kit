@@ -1,0 +1,7 @@
+tables:
+  Note:
+    map: Notes
+    fields:
+      id: string @id @default(uuid)
+      text: string
+      createdAt: datetime @default(now)

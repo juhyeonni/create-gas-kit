@@ -1,0 +1,39 @@
+{
+  "name": "create-gas-kit",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "create-gas-kit": "dist/index.js"
+  },
+  "repository": "github:juhyeonni/create-gas-kit",
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node20 --packages=external --outfile=dist/index.js --banner:js=\"#!/usr/bin/env node\"",
+    "postbuild": "chmod +x dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src test",
+    "format": "prettier --write .",
+    "test": "node --test test/*.test.ts",
+    "test:integration": "INTEGRATION=1 node --test test/integration.test.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.7.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.4.1",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.69.0"
+  }
+}

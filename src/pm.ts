@@ -14,7 +14,6 @@ export function installCommand(pm: PackageManager): string {
 }
 
 export function runCommand(pm: PackageManager, script: string): string {
-  if (pm === 'pnpm') return `pnpm ${script}`
-  if (pm === 'bun') return `bun run ${script}`
-  return `npm run ${script}`
+  // Always `run`: `pnpm setup` and `pnpm deploy` are pnpm built-ins.
+  return `${pm} run ${script}`
 }

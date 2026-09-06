@@ -24,13 +24,13 @@ test('install command is "<pm> install" for every manager', () => {
   assert.equal(installCommand('bun'), 'bun install')
 })
 
-test('run command drops "run" only for pnpm', () => {
+test('run command always uses "run" (pnpm setup/deploy are built-ins)', () => {
   assert.equal(runCommand('npm', 'dev'), 'npm run dev')
-  assert.equal(runCommand('pnpm', 'dev'), 'pnpm dev')
+  assert.equal(runCommand('pnpm', 'setup'), 'pnpm run setup')
   assert.equal(runCommand('bun', 'dev'), 'bun run dev')
 })
 
 test('run command passes multi-word scripts through verbatim', () => {
   assert.equal(runCommand('npm', 'push dev'), 'npm run push dev')
-  assert.equal(runCommand('pnpm', 'push dev'), 'pnpm push dev')
+  assert.equal(runCommand('pnpm', 'push dev'), 'pnpm run push dev')
 })

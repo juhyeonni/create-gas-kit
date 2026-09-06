@@ -9,9 +9,12 @@ const DEFAULT_TYPE = existsSync('schema.gsq.yaml') ? 'sheets' : 'standalone'
 
 function runCommand(script) {
   const agent = process.env.npm_config_user_agent ?? ''
-  if (agent.startsWith('pnpm')) return `pnpm ${script}`
-  if (agent.startsWith('bun')) return `bun run ${script}`
-  return `npm run ${script}`
+  const pm = agent.startsWith('pnpm')
+    ? 'pnpm'
+    : agent.startsWith('bun')
+      ? 'bun'
+      : 'npm'
+  return `${pm} run ${script}`
 }
 
 function readPackageName() {

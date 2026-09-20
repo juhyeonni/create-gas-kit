@@ -8,6 +8,7 @@ import {
   outro,
   text,
   select,
+  multiselect,
   confirm,
   isCancel,
   cancel,
@@ -71,6 +72,7 @@ async function resolveChoice<T extends string>(
   message: string,
   choices: readonly T[],
   defaultValue: T,
+  hints: Record<T, string>,
 ): Promise<T> {
   if (flagValue !== undefined) {
     if (!choices.includes(flagValue as T))
@@ -82,7 +84,11 @@ async function resolveChoice<T extends string>(
   const result = await select<string>({
     message,
     initialValue: defaultValue,
-    options: choices.map((value) => ({ value, label: value })),
+    options: choices.map((value) => ({
+      value,
+      label: value,
+      hint: hints[value],
+    })),
   })
   if (isCancel(result)) return cancelled()
   return result as T
@@ -111,32 +117,134 @@ function printNextSteps(
   if (!installed) lines.push(installCommand(pm))
   if (!setupDone) lines.push(runCommand(pm, 'setup'))
   lines.push(runCommand(pm, 'dev'))
-  lines.push(runCommand(pm, 'push dev'))
+  lines.push(runCommand(pm, 'deploy dev'))
   process.stdout.write(`${lines.join('\n')}\n`)
+  process.stdout.write(
+    `\ndev runs locally with mocked server calls — deploy dev is what puts it on Google.\n`,
+  )
   if (setupDone) return
   process.stdout.write(
-    `\nsetup creates or connects the Apps Script project and writes envs.json.\n` +
+    `setup creates or connects the Apps Script project and writes envs.json.\n` +
       `You can also write envs.json by hand: { "dev": { "scriptId": "<scriptId>", "deploymentId": "" } }\n`,
   )
 }
 
-async function main(): Promise<void> {
-  let values: {
-    client?: string
-    ui?: string
-    shadcn?: boolean
-    'no-shadcn'?: boolean
-    gsquery?: boolean
-    'no-gsquery'?: boolean
-    'gws-emul'?: boolean
-    'no-gws-emul'?: boolean
-    'no-git'?: boolean
-    'no-install'?: boolean
-    setup?: boolean
-    'no-setup'?: boolean
-    help?: boolean
-    version?: boolean
+interface Flags {
+  client?: string
+  ui?: string
+  shadcn?: boolean
+  'no-shadcn'?: boolean
+  gsquery?: boolean
+  'no-gsquery'?: boolean
+  'gws-emul'?: boolean
+  'no-gws-emul'?: boolean
+  'no-git'?: boolean
+  'no-install'?: boolean
+  setup?: boolean
+  'no-setup'?: boolean
+  help?: boolean
+  version?: boolean
+}
+
+type ExtraKey = 'tailwind' | 'shadcn' | 'gsquery' | 'gwsEmul'
+
+interface Extras {
+  ui: 'tailwind' | 'none'
+  shadcn: boolean
+  gsquery: boolean
+  gwsEmul: boolean
+}
+
+/** One multiselect for everything optional; flags still win and skip their row. */
+async function resolveExtras(values: Flags, client: string): Promise<Extras> {
+  if (
+    values.ui !== undefined &&
+    values.ui !== 'tailwind' &&
+    values.ui !== 'none'
+  )
+    usageError(
+      `Invalid value "${values.ui}" for --ui — expected tailwind or none`,
+    )
+
+  const fixed: Partial<Record<ExtraKey, boolean>> = {}
+  if (values.ui !== undefined) fixed.tailwind = values.ui === 'tailwind'
+  if (values.shadcn) fixed.shadcn = true
+  if (values['no-shadcn']) fixed.shadcn = false
+  if (values.gsquery) fixed.gsquery = true
+  if (values['no-gsquery']) fixed.gsquery = false
+  if (values['gws-emul']) fixed.gwsEmul = true
+  if (values['no-gws-emul']) fixed.gwsEmul = false
+
+  const offerShadcn = client === 'react' && fixed.tailwind !== false
+  const catalog: {
+    value: ExtraKey
+    label: string
+    hint: string
+    on: boolean
+  }[] = [
+    {
+      value: 'tailwind',
+      label: 'Tailwind CSS',
+      hint: 'v4, via the Vite plugin',
+      on: true,
+    },
+    ...(offerShadcn
+      ? [
+          {
+            value: 'shadcn' as const,
+            label: 'shadcn/ui',
+            hint: 'React components — turns Tailwind on',
+            on: true,
+          },
+        ]
+      : []),
+    {
+      value: 'gsquery',
+      label: 'gas-sheets-query example',
+      hint: 'typed Sheets access generated from a schema',
+      on: false,
+    },
+    {
+      value: 'gwsEmul',
+      label: 'Local GWS emulator',
+      hint: 'run server calls locally instead of pushing to Google',
+      on: false,
+    },
+  ]
+  const options = catalog.filter((entry) => fixed[entry.value] === undefined)
+
+  let chosen: ExtraKey[] = []
+  if (options.length > 0) {
+    const result = await multiselect<ExtraKey>({
+      message: 'Extras',
+      options: options.map(({ value, label, hint }) => ({
+        value,
+        label,
+        hint,
+      })),
+      initialValues: options
+        .filter((entry) => entry.on)
+        .map((entry) => entry.value),
+      required: false,
+    })
+    if (isCancel(result)) return cancelled()
+    chosen = result
   }
+
+  const picked = (key: ExtraKey): boolean => fixed[key] ?? chosen.includes(key)
+  const wantsShadcn = offerShadcn && picked('shadcn')
+  const tailwind =
+    fixed.tailwind ?? (wantsShadcn || chosen.includes('tailwind'))
+  return {
+    ui: tailwind ? 'tailwind' : 'none',
+    shadcn: wantsShadcn && tailwind,
+    gsquery: picked('gsquery'),
+    gwsEmul: picked('gwsEmul'),
+  }
+}
+
+async function main(): Promise<void> {
+  let values: Flags
   let positionals: string[]
 
   try {
@@ -181,7 +289,9 @@ async function main(): Promise<void> {
   if (!NAME_RE.test(name))
     usageError(`Invalid project name "${name}" — must match ${NAME_RE}`)
   if (fs.existsSync(dir) && fs.readdirSync(dir).length > 0) {
-    failure(`Directory "${dir}" already exists and is not empty`)
+    failure(
+      `Directory "${dir}" already exists and is not empty — remove it or pick another name`,
+    )
   }
 
   const client = await resolveChoice(
@@ -190,42 +300,22 @@ async function main(): Promise<void> {
     'Client',
     CLIENTS,
     'react',
+    {
+      react: 'React 19',
+      vanilla: 'no framework, plain TypeScript',
+      vue: 'Vue 3',
+      svelte: 'Svelte 5',
+      preact: 'Preact 10',
+    },
   )
-  const ui = await resolveChoice(
-    values.ui,
-    'ui',
-    'Styling',
-    ['tailwind', 'none'],
-    'tailwind',
-  )
-  const shadcn =
-    client === 'react' && ui === 'tailwind'
-      ? await resolveBoolean(
-          values.shadcn,
-          values['no-shadcn'],
-          'Use shadcn/ui?',
-          true,
-        )
-      : false
-  const gsquery = await resolveBoolean(
-    values.gsquery,
-    values['no-gsquery'],
-    'Include the gas-sheets-query example?',
-    false,
-  )
-  const gwsEmul = await resolveBoolean(
-    values['gws-emul'],
-    values['no-gws-emul'],
-    'Include the local GWS emulator?',
-    false,
-  )
+  const { ui, shadcn, gsquery, gwsEmul } = await resolveExtras(values, client)
   const git = !values['no-git']
   const install = !values['no-install']
   const setup = install
     ? await resolveBoolean(
         values.setup,
         values['no-setup'],
-        'Set up the Apps Script project now? (needs clasp login)',
+        'Set up the Apps Script project now? (signs in to Google in a browser and creates a real Apps Script project)',
         true,
       )
     : false
@@ -258,8 +348,15 @@ async function main(): Promise<void> {
   }
   if (installed && gsquery)
     spawnSync(pm, ['run', 'generate'], { cwd: dir, stdio: 'inherit' })
-  const setupDone = installed && setup
-  if (setupDone) spawnSync(pm, ['run', 'setup'], { cwd: dir, stdio: 'inherit' })
+  let setupDone = false
+  if (installed && setup) {
+    const result = spawnSync(pm, ['run', 'setup'], {
+      cwd: dir,
+      stdio: 'inherit',
+    })
+    setupDone =
+      result.status === 0 && fs.existsSync(path.join(dir, 'envs.json'))
+  }
 
   printNextSteps(dir, pm, installed, setupDone)
   outro('Done')
